@@ -3,19 +3,10 @@
  * Released under MIT license, http://cubiq.org/license
  */
 var SwipeView = (function(){
-	var hasTouch = 'ontouchstart' in window,
-		hasTransform = (function() {
-			var thisBody = document.body || document.documentElement,
-					thisStyle = thisBody.style,
-					support = thisStyle.transform !== undefined || thisStyle.webkitTransform !== undefined || thisStyle.MozTransform !== undefined || thisStyle.msTransform !== undefined || thisStyle.OTransform !== undefined;
-			return support;
-		})(),
-		hasTransition = (function() {
-			var thisBody = document.body || document.documentElement,
-					thisStyle = thisBody.style,
-					support = thisStyle.transition !== undefined || thisStyle.webkitTransition !== undefined || thisStyle.MozTransition !== undefined || thisStyle.msTransition !== undefined || thisStyle.OTransition !== undefined;
-			return support;
-		})(),
+	var support = (document.body || document.documentElement).style,
+		hasTouch = 'ontouchstart' in window,
+		hasTransform = support.transform !== undefined || support.webkitTransform !== undefined || support.MozTransform !== undefined || support.msTransform !== undefined || support.OTransform !== undefined,
+		hasTransition = support.transition !== undefined || support.webkitTransition !== undefined || support.MozTransition !== undefined || support.msTransition !== undefined || support.OTransition !== undefined,
 		resizeEvent = 'onorientationchange' in window ? 'orientationchange' : 'resize',
 		startEvent = hasTouch ? 'touchstart' : 'mousedown',
 		moveEvent = hasTouch ? 'touchmove' : 'mousemove',
