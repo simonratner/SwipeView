@@ -4,6 +4,7 @@
  */
 var SwipeView = (function(){
 	var support = (document.body || document.documentElement).style,
+		hasEvent = 'addEventListener' in window,
 		hasTouch = 'ontouchstart' in window,
 		hasTransform = support.transform !== undefined || support.webkitTransform !== undefined || support.MozTransform !== undefined || support.msTransform !== undefined || support.OTransform !== undefined,
 		hasTransition = support.transition !== undefined || support.webkitTransition !== undefined || support.MozTransition !== undefined || support.msTransition !== undefined || support.OTransition !== undefined,
@@ -62,16 +63,18 @@ var SwipeView = (function(){
 			className = this.masterPages[1].className;
 			this.masterPages[1].className = !className ? 'swipeview-active' : className + ' swipeview-active';
 
-			window.addEventListener(resizeEvent, this, false);
-			this.wrapper.addEventListener(startEvent, this, false);
-			this.wrapper.addEventListener(moveEvent, this, false);
-			this.wrapper.addEventListener(endEvent, this, false);
-			this.slider.addEventListener('webkitTransitionEnd', this, false);
-			this.slider.addEventListener('MSTransitionEnd', this, false);
-			this.slider.addEventListener('oTransitionEnd', this, false);
-			this.slider.addEventListener('transitionend', this, false);
+			if (hasEvent) {
+				window.addEventListener(resizeEvent, this, false);
+				this.wrapper.addEventListener(startEvent, this, false);
+				this.wrapper.addEventListener(moveEvent, this, false);
+				this.wrapper.addEventListener(endEvent, this, false);
+				this.slider.addEventListener('webkitTransitionEnd', this, false);
+				this.slider.addEventListener('MSTransitionEnd', this, false);
+				this.slider.addEventListener('oTransitionEnd', this, false);
+				this.slider.addEventListener('transitionend', this, false);
+			}
 
-/*			if (!hasTouch) {
+/*			if (!hasTouch && hasEvent) {
 				this.wrapper.addEventListener('mouseout', this, false);
 			}*/
 		};
@@ -84,44 +87,56 @@ var SwipeView = (function(){
 		customEvents: [],
 		
 		onFlip: function (fn) {
-			this.wrapper.addEventListener('swipeview-flip', fn, false);
+			if (hasEvent) {
+				this.wrapper.addEventListener('swipeview-flip', fn, false);
+			}
 			this.customEvents.push(['flip', fn]);
 		},
 		
 		onMoveOut: function (fn) {
-			this.wrapper.addEventListener('swipeview-moveout', fn, false);
+			if (hasEvent) {
+				this.wrapper.addEventListener('swipeview-moveout', fn, false);
+			}
 			this.customEvents.push(['moveout', fn]);
 		},
 
 		onMoveIn: function (fn) {
-			this.wrapper.addEventListener('swipeview-movein', fn, false);
+			if (hasEvent) {
+				this.wrapper.addEventListener('swipeview-movein', fn, false);
+			}
 			this.customEvents.push(['movein', fn]);
 		},
 		
 		onTouchStart: function (fn) {
-			this.wrapper.addEventListener('swipeview-touchstart', fn, false);
+			if (hasEvent) {
+				this.wrapper.addEventListener('swipeview-touchstart', fn, false);
+			}
 			this.customEvents.push(['touchstart', fn]);
 		},
 
 		destroy: function () {
-			var i, l;
-			for (i=0, l=this.customEvents.length; i<l; i++) {
-				this.wrapper.removeEventListener('swipeview-' + this.customEvents[i][0], this.customEvents[i][1], false);
+			if (hasEvent) {
+				var i, l;
+				for (i=0, l=this.customEvents.length; i<l; i++) {
+					this.wrapper.removeEventListener('swipeview-' + this.customEvents[i][0], this.customEvents[i][1], false);
+				}
 			}
 			
 			this.customEvents = [];
 			
 			// Remove the event listeners
-			window.removeEventListener(resizeEvent, this, false);
-			this.wrapper.removeEventListener(startEvent, this, false);
-			this.wrapper.removeEventListener(moveEvent, this, false);
-			this.wrapper.removeEventListener(endEvent, this, false);
-			this.slider.removeEventListener('webkitTransitionEnd', this, false);
-			this.slider.removeEventListener('MSTransitionEnd', this, false);
-			this.slider.removeEventListener('oTransitionEnd', this, false);
-			this.slider.removeEventListener('transitionend', this, false);
-
-/*			if (!hasTouch) {
+			if (hasEvent) {
+				window.removeEventListener(resizeEvent, this, false);
+				this.wrapper.removeEventListener(startEvent, this, false);
+				this.wrapper.removeEventListener(moveEvent, this, false);
+				this.wrapper.removeEventListener(endEvent, this, false);
+				this.slider.removeEventListener('webkitTransitionEnd', this, false);
+				this.slider.removeEventListener('MSTransitionEnd', this, false);
+				this.slider.removeEventListener('oTransitionEnd', this, false);
+				this.slider.removeEventListener('transitionend', this, false);
+			}
+			
+/*			if (!hasTouch && hasEvent) {
 				this.wrapper.removeEventListener('mouseout', this, false);
 			}*/
 		},
@@ -428,11 +443,18 @@ var SwipeView = (function(){
 		},
 		
 		__event: function (type) {
-			var ev = document.createEvent("Event");
-			
-			ev.initEvent('swipeview-' + type, true, true);
-
-			this.wrapper.dispatchEvent(ev);
+			if (hasEvent) {
+				var ev = document.createEvent("Event");
+				ev.initEvent('swipeview-' + type, true, true);
+				this.wrapper.dispatchEvent(ev);
+			} else {
+				var i, l;
+				for (i=0, l=this.customEvents.length; i<l; i++) {
+					if (this.customEvents[i][0] === type) {
+						this.customEvents[i][1].call(this);
+					}
+				}
+			}
 		}
 	};
 
