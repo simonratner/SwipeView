@@ -367,7 +367,7 @@ var SwipeView = (function(){
 
 			// Check if we exceeded the snap threshold
 			if (dist < this.snapThreshold) {
-				this.__dur('300ms');
+				this.__dur(Math.floor(300 * dist / this.snapThreshold) + 'ms');
 				this.__pos(-this.page * this.pageWidth);
 				return;
 			}
@@ -416,9 +416,9 @@ var SwipeView = (function(){
 			pageFlipIndex = pageFlipIndex - Math.floor(pageFlipIndex / this.options.numberOfPages) * this.options.numberOfPages;
 			this.masterPages[pageFlip].dataset.upcomingPageIndex = pageFlipIndex;		// Index to be loaded in the newly flipped page
 
-			this.__dur('500ms');
-			
 			newX = -this.page * this.pageWidth;
+			
+			this.__dur(Math.floor(500 * Math.abs(this.x - newX) / this.pageWidth) + 'ms');
 
 			// Hide the next page if we decided to disable looping
 			if (!this.options.loop) {
